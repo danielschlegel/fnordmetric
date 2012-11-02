@@ -6,6 +6,7 @@ require 'yajl'
 require 'sinatra/base'
 require 'haml'
 require 'json'
+require 'uri'
 require "thin"
 require 'rack/server'
 require 'rack/websocket'
@@ -47,9 +48,10 @@ module FnordMetric
   end
 
   def self.mk_redis
-    host, port = options[:redis_url].gsub("redis://", "").split(":")
-    redis_opts = { :host => host }
-    redis_opts.merge!(:port => port) if port
+    uri = URI.parse(options[:redis_url])
+    redis_opts = { :host => uri.host }
+    redis_opts.merge!(:port => uri.port) if uri.port
+    redis_opts.merge!(:password => uri.password) if uri.password
     Redis.new(redis_opts)
   end
 
